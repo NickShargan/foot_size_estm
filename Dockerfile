@@ -9,9 +9,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# # 1) Install CPU-only torch/torchvision explicitly
-# RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu \
-#     torch==2.4.0 torchvision==0.19.0
+# 1) Install CPU-only torch/torchvision explicitly
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu \
+    torch==2.4.0 torchvision==0.19.0
 
 # Copy and install Python dependencies
 COPY requirements.txt ./

@@ -8,3 +8,6 @@ ultralytics==8.3.59
 python-multipart
 # torch is a dependency of ultralytics, but if needed you can pin it:
 # torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu
+# Also pin these to match what's preinstalled (prevents resolver from swapping):
+torch==2.4.0
+torchvision==0.19.0
