@@ -1,0 +1,10 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+pillow==10.4.0
+numpy==2.0.2
+matplotlib==3.9.2
+opencv-python-headless==4.10.0.84
+ultralytics==8.3.59
+python-multipart
+# torch is a dependency of ultralytics, but if needed you can pin it:
+# torch==2.4.0 --index-url https://download.pytorch.org/whl/cpu
