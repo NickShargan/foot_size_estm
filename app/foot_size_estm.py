@@ -4,7 +4,7 @@ import logging
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from ultralytics import SAM
+from ultralytics import SAM, FastSAM
 
 
 # Mondopoint (cm) reference to EU/US/UK - adults (approx.)
@@ -393,6 +393,28 @@ def get_standardized_width(width_mm: float, gender: str = "f") -> str:
     return "Unknown"
 
 
+def maks_opening(mask_init, it_num):
+    """Applies morphological operation opening(erosion->dilation)"""
+
+    # mask is your binary array (0/1 or 0/255)
+    mask = mask_init.astype(np.uint8) * 255  # OpenCV prefers 0/255
+
+    # Create a structuring element (3x3 square kernel here)
+    kern_size = 1 + it_num * 2
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kern_size, kern_size))
+
+    # Opening = erosion followed by dilation (removes small blobs)
+    mask_opened = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+    # # Closing = dilation followed by erosion (fills small holes)
+    # mask_clean = cv2.morphologyEx(mask_opened, cv2.MORPH_CLOSE, kernel)
+
+    # Convert back to 0/1
+    mask_opened = (mask_opened > 0).astype(np.uint8)
+
+    return mask_opened
+
+
 def get_foot_size_estm(img_path, gender='f', ref_obj='paper_letter',
                        is_wall=True):
     """Returns length and width in mm of foot based on input image.
@@ -404,11 +426,39 @@ def get_foot_size_estm(img_path, gender='f', ref_obj='paper_letter',
 
     # Load a model;
     # todo: should be done as class to avoid init on each inference
-    model = SAM("sam2.1_t.pt")
+    # model = SAM("sam2.1_t.pt")
+    # model = SAM("sam2.1_b.pt")
+    model = FastSAM("FastSAM-s.pt")
 
-    results_foot = model(img_path, points=[[[1683, 1530]]], labels=[[1]])
-    results_paper = model(img_path, points=[[[178, 1906], [2755, 1989]]],
-                         labels=[[1, 1]])
+    # results_foot = model(img_path, points=[[1683, 1530]], labels=[[1]],
+    #                      imgsz=1024)
+    # results_paper = model(img_path, points=[[178, 1906], [2755, 1989]],
+    #                      labels=[[1, 1]], imgsz=1024)
+    # # print(type(results))
+
+    # # should be picked by some reference points (e.g. colour for paper or
+    # # position for feet)
+    # img_orig = np.array(results_paper[0].orig_img)
+    # masks = results_paper[0].masks.data
+    # masks = masks.cpu().numpy()
+    # paper_mask = masks[0]
+
+    # masks = results_foot[0].masks.data
+    # masks = masks.cpu().numpy()
+    # foot_mask = masks[0]
+
+    img_size = 1024
+
+    results_foot = model(img_path, points=[[1683, 1530]], labels=[[1]], imgsz=img_size)
+    results_paper_1 = model(img_path, points=[[178, 1906]],
+                        labels=[[1]], imgsz=img_size)
+    results_paper = model(img_path, points=[[2755, 1989]],
+                        labels=[[1]], imgsz=img_size)
+
+    # results_paper[results_paper_1] = True
+
+    # results_paper = model(img_path, points=[[178, 1906], [2755, 1989]],
+    #                         labels=[[1, 1]], imgsz=1024)
     # print(type(results))
 
     # should be picked by some reference points (e.g. colour for paper or
@@ -418,13 +468,33 @@ def get_foot_size_estm(img_path, gender='f', ref_obj='paper_letter',
     masks = masks.cpu().numpy()
     paper_mask = masks[0]
 
+    masks_1 = results_paper_1[0].masks.data
+    masks_1 = masks_1.cpu().numpy()
+    paper_mask_1 = masks_1[0]
+
+    print(paper_mask.shape)
+    print(paper_mask_1.shape)
+    print(np.unique(paper_mask_1))
+
+    paper_mask[paper_mask_1 == 1] = 1
+
     masks = results_foot[0].masks.data
     masks = masks.cpu().numpy()
     foot_mask = masks[0]
 
+    foot_mask = maks_opening(foot_mask, it_num=3)
+    paper_mask = maks_opening(paper_mask, it_num=3)
+
     ref_obj_corners = get_ref_obj_corners(paper_mask)
     # how to define width if is_wall = False
     foot_points = get_foot_points(foot_mask)
+
+    ref_obj_corners = ref_obj_corners.astype(float)
+    ref_obj_corners *= img_orig.shape[0] / paper_mask.shape[0]
+    ref_obj_corners = ref_obj_corners.astype(int)
+    foot_points = foot_points.astype(float)
+    foot_points *= img_orig.shape[0] / paper_mask.shape[0]
+    foot_points = foot_points.astype(int)
 
     feet_length_mm, feet_width_mm = get_foot_sizes_mm(ref_obj_corners,
                                                       foot_points, is_vis=True,
