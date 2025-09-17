@@ -18,11 +18,12 @@ class MeasureResponse(BaseModel):
 
 def measure():
     tmp_path = "../foot_size_estm/IMG_7350.jpg"
+    # tmp_path = "../foot_size_estm/IMG_7349.jpg"
     gender = "m"
     ref_obj = "paper_letter"
     is_wall = True
 
-    length_mm, width_mm = get_foot_size_estm(
+    length_mm, width_mm, _ = get_foot_size_estm(
         tmp_path, gender=gender, ref_obj=ref_obj, is_wall=is_wall
     )
 

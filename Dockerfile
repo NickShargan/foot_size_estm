@@ -27,9 +27,13 @@ ENV PORT=8080 \
 # (Optional) place your model weights at build time:
 # COPY sam2.1_b.pt /app/sam2.1_b.pt
 # ENV SAM_WEIGHTS=/app/sam2.1_b.pt
-#COPY sam2.1_b.pt /app/sam2.1_t.pt
-#ENV SAM_WEIGHTS=/app/sam2.1_t.pt
+# COPY sam2.1_b.pt /app/sam2.1_t.pt
+# ENV SAM_WEIGHTS=/app/sam2.1_t.pt
+COPY FastSAM-s.pt /app/FastSAM-s.pt
+ENV SAM_WEIGHTS=/app/FastSAM-s.pt
 
+
+ENV MPLBACKEND=Agg PORT=8080
 EXPOSE 8080
 # CMD ["python", "-m", "app.main"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
