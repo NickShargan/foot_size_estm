@@ -1,0 +1,22 @@
+# Use a slim Python base
+FROM python:3.11-slim
+
+# (Optional) System libs if your UI draws images
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 libglib2.0-0 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install deps
+COPY ui/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy app
+COPY ui/ui.py ./ui.py
+
+# Gradio will listen on $PORT
+ENV PORT=8080 PYTHONUNBUFFERED=1
+
+EXPOSE 8080
+CMD ["python", "ui.py"]

@@ -50,3 +50,37 @@ gcloud run deploy foot-size-api \
 curl -X POST "https://foot-size-api-762504128529.northamerica-northeast1.run.app/measure"   -F "file=@./foot_size_estm/IMG_7350.jpg"   -F "gender=m" -F "ref_obj=paper_letter" -F "is_wall=true" -F "return_vis=false"  | jq .
 ```
 
+
+## UI build & deploy
+```
+PROJECT_ID=$(gcloud config get-value project)
+REGION=northamerica-northeast1
+SERVICE_UI=foot-ui
+TAG=$(date +%Y%m%d%H%M)
+
+IMAGE_UI="$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$SERVICE_UI:$TAG"
+
+gcloud builds submit --config=cloudbuild.yaml --substitutions=_IMAGE_UI="$IMAGE_UI" .
+
+gcloud run deploy $SERVICE_UI \
+  --image "$IMAGE_UI" \
+  --region $REGION \
+  --platform managed \
+  --allow-unauthenticated
+```
+
+https://foot-ui-762504128529.northamerica-northeast1.run.app
+
+gcloud builds submit \
+  --config=cloudbuild.yaml \
+  --substitutions=_IMAGE_UI="$IMAGE_UI" \
+  .
+
+gcloud run deploy "$SERVICE_UI" \
+  --image "$IMAGE_UI" \
+  --region "$REGION" \
+  --platform managed \
+  --allow-unauthenticated \
+  --set-env-vars API_BASE="https://foot-size-api-762504128529.northamerica-northeast1.run.app" \
+  --memory 2Gi --timeout 300
+
