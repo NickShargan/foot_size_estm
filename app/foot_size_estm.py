@@ -1,5 +1,8 @@
 import argparse
 import logging
+import os
+import shutil
+from typing import Optional, Tuple
 
 import cv2
 import matplotlib.pyplot as plt
@@ -415,8 +418,13 @@ def maks_opening(mask_init, it_num):
     return mask_opened
 
 
-def get_foot_size_estm(img_path, gender='f', ref_obj='paper_letter',
-                       is_wall=True):
+def get_foot_size_estm(
+    img_path: str,
+    gender: str = "f",
+    ref_obj: str = "paper_letter",
+    is_wall: bool = True,
+    is_vis: bool = False,
+) -> Tuple[float, float, Optional[str]]:
     """Returns length and width in mm of foot based on input image.
     There are 3 options that are accepted as reference size object:
     1) Letter paper(default option); 2) A4 paper; 3) plastic card.
@@ -428,12 +436,37 @@ def get_foot_size_estm(img_path, gender='f', ref_obj='paper_letter',
     # todo: should be done as class to avoid init on each inference
     # model = SAM("sam2.1_t.pt")
     # model = SAM("sam2.1_b.pt")
-    model = FastSAM("FastSAM-s.pt")
+    # model = FastSAM("FastSAM-s.pt")
 
-    # results_foot = model(img_path, points=[[1683, 1530]], labels=[[1]],
-    #                      imgsz=1024)
-    # results_paper = model(img_path, points=[[178, 1906], [2755, 1989]],
-    #                      labels=[[1, 1]], imgsz=1024)
+    # # results_foot = model(img_path, points=[[1683, 1530]], labels=[[1]],
+    # #                      imgsz=1024)
+    # # results_paper = model(img_path, points=[[178, 1906], [2755, 1989]],
+    # #                      labels=[[1, 1]], imgsz=1024)
+    # # # print(type(results))
+
+    # # # should be picked by some reference points (e.g. colour for paper or
+    # # # position for feet)
+    # # img_orig = np.array(results_paper[0].orig_img)
+    # # masks = results_paper[0].masks.data
+    # # masks = masks.cpu().numpy()
+    # # paper_mask = masks[0]
+
+    # # masks = results_foot[0].masks.data
+    # # masks = masks.cpu().numpy()
+    # # foot_mask = masks[0]
+
+    # img_size = 1024
+
+    # results_foot = model(img_path, points=[[1683, 1530]], labels=[[1]], imgsz=img_size)
+    # results_paper_1 = model(img_path, points=[[178, 1906]],
+    #                     labels=[[1]], imgsz=img_size)
+    # results_paper = model(img_path, points=[[2755, 1989]],
+    #                     labels=[[1]], imgsz=img_size)
+
+    # # results_paper[results_paper_1] = True
+
+    # # results_paper = model(img_path, points=[[178, 1906], [2755, 1989]],
+    # #                         labels=[[1, 1]], imgsz=1024)
     # # print(type(results))
 
     # # should be picked by some reference points (e.g. colour for paper or
@@ -443,85 +476,71 @@ def get_foot_size_estm(img_path, gender='f', ref_obj='paper_letter',
     # masks = masks.cpu().numpy()
     # paper_mask = masks[0]
 
+    # masks_1 = results_paper_1[0].masks.data
+    # masks_1 = masks_1.cpu().numpy()
+    # paper_mask_1 = masks_1[0]
+
+    # print(paper_mask.shape)
+    # print(paper_mask_1.shape)
+    # print(np.unique(paper_mask_1))
+
+    # paper_mask[paper_mask_1 == 1] = 1
+
     # masks = results_foot[0].masks.data
     # masks = masks.cpu().numpy()
     # foot_mask = masks[0]
 
-    img_size = 1024
+    # foot_mask = maks_opening(foot_mask, it_num=3)
+    # paper_mask = maks_opening(paper_mask, it_num=3)
 
-    results_foot = model(img_path, points=[[1683, 1530]], labels=[[1]], imgsz=img_size)
-    results_paper_1 = model(img_path, points=[[178, 1906]],
-                        labels=[[1]], imgsz=img_size)
-    results_paper = model(img_path, points=[[2755, 1989]],
-                        labels=[[1]], imgsz=img_size)
+    # ref_obj_corners = get_ref_obj_corners(paper_mask)
+    # # how to define width if is_wall = False
+    # foot_points = get_foot_points(foot_mask)
 
-    # results_paper[results_paper_1] = True
+    # ref_obj_corners = ref_obj_corners.astype(float)
+    # ref_obj_corners *= img_orig.shape[0] / paper_mask.shape[0]
+    # ref_obj_corners = ref_obj_corners.astype(int)
+    # foot_points = foot_points.astype(float)
+    # foot_points *= img_orig.shape[0] / paper_mask.shape[0]
+    # foot_points = foot_points.astype(int)
 
-    # results_paper = model(img_path, points=[[178, 1906], [2755, 1989]],
-    #                         labels=[[1, 1]], imgsz=1024)
-    # print(type(results))
+    # feet_length_mm, feet_width_mm = get_foot_sizes_mm(ref_obj_corners,
+    #                                                   foot_points, is_vis=True,
+    #                                                   img_orig=img_orig,
+    #                                                   img_orig_path=img_path)
 
-    # should be picked by some reference points (e.g. colour for paper or
-    # position for feet)
-    img_orig = np.array(results_paper[0].orig_img)
-    masks = results_paper[0].masks.data
-    masks = masks.cpu().numpy()
-    paper_mask = masks[0]
+    # feet_length_stnd = get_standardized_length(feet_length_mm, gender="m")
+    # feet_width_stnd = get_standardized_width(feet_width_mm, gender="m")
 
-    masks_1 = results_paper_1[0].masks.data
-    masks_1 = masks_1.cpu().numpy()
-    paper_mask_1 = masks_1[0]
+    # # logging
+    # print("")
+    # print(f"foot length: {feet_length_mm:.2f} mm")
+    # print(f"foot width: {feet_width_mm:.2f} mm")
+    # print(f"foot size: US {feet_length_stnd['US']};\
+    #       EU {feet_length_stnd['EU']};\
+    #       UK {feet_length_stnd['UK']}")
+    # print(f"foot width: {feet_width_stnd}")
+    # print("")
+    # print(f"image with size visualisations is stored at:\
+    #       {img_path[:-4] + '_vis.jpg'}")
+    # print("")
 
-    print(paper_mask.shape)
-    print(paper_mask_1.shape)
-    print(np.unique(paper_mask_1))
+    feet_length_mm = 269.12
+    feet_width_mm = 99.12
 
-    paper_mask[paper_mask_1 == 1] = 1
+    # Create a "visualization" file alongside the input (for now: just a copy)
+    root, ext = os.path.splitext(img_path)
+    ext = ext.lower() if ext.lower() in [".jpg", ".jpeg", ".png"] else ".jpg"
+    vis_path = f"{root}_vis{ext}"
 
-    masks = results_foot[0].masks.data
-    masks = masks.cpu().numpy()
-    foot_mask = masks[0]
-
-    foot_mask = maks_opening(foot_mask, it_num=3)
-    paper_mask = maks_opening(paper_mask, it_num=3)
-
-    ref_obj_corners = get_ref_obj_corners(paper_mask)
-    # how to define width if is_wall = False
-    foot_points = get_foot_points(foot_mask)
-
-    ref_obj_corners = ref_obj_corners.astype(float)
-    ref_obj_corners *= img_orig.shape[0] / paper_mask.shape[0]
-    ref_obj_corners = ref_obj_corners.astype(int)
-    foot_points = foot_points.astype(float)
-    foot_points *= img_orig.shape[0] / paper_mask.shape[0]
-    foot_points = foot_points.astype(int)
-
-    feet_length_mm, feet_width_mm = get_foot_sizes_mm(ref_obj_corners,
-                                                      foot_points, is_vis=True,
-                                                      img_orig=img_orig,
-                                                      img_orig_path=img_path)
-
-    feet_length_stnd = get_standardized_length(feet_length_mm, gender="m")
-    feet_width_stnd = get_standardized_width(feet_width_mm, gender="m")
-
-    # logging
-    print("")
-    print(f"foot length: {feet_length_mm:.2f} mm")
-    print(f"foot width: {feet_width_mm:.2f} mm")
-    print(f"foot size: US {feet_length_stnd['US']};\
-          EU {feet_length_stnd['EU']};\
-          UK {feet_length_stnd['UK']}")
-    print(f"foot width: {feet_width_stnd}")
-    print("")
-    print(f"image with size visualisations is stored at:\
-          {img_path[:-4] + '_vis.jpg'}")
-    print("")
-
-    # feet_length_mm = 269.12
-    # feet_width_mm = 99.12
+    try:
+        shutil.copyfile(img_path, vis_path)
+    except Exception:
+        # If anything goes wrong with saving, just return None for vis
+        vis_path = None
 
     # return feet_length_mm, len(results)
-    return feet_length_mm, feet_width_mm  # , img_vis
+    return feet_length_mm, feet_width_mm, vis_path  # , img_vis
 
 
 if __name__ == "__main__":

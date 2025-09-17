@@ -8,8 +8,6 @@ import base64
 
 # import numpy as np
 
-# ---- Import your project code ----
-# You’ll need to put your existing function into app/foot_size.py
 from .foot_size_estm import get_foot_size_estm
 
 
@@ -17,7 +15,7 @@ app = FastAPI(
     title="Foot Size Estimator",
     description="Estimate foot length/width (mm) and standardized shoe sizes\
                  from a single image.",
-    version="1.0.0",
+    version="0.1.0",
 )
 
 
@@ -48,8 +46,9 @@ async def measure(
         with open(tmp_path, "wb") as f:
             f.write(await file.read())
 
-        length_mm, width_mm = get_foot_size_estm(
-            tmp_path, gender=gender, ref_obj=ref_obj, is_wall=is_wall
+        length_mm, width_mm, vis_path = get_foot_size_estm(
+            tmp_path, gender=gender, ref_obj=ref_obj, is_wall=is_wall,
+            is_vis=return_vis
         )
 
         resp = {
@@ -58,10 +57,13 @@ async def measure(
             "image_vis_b64": None,
         }
 
-        # if return_vis and vis_path and os.path.exists(vis_path):
-        #     with open(vis_path, "rb") as vf:
-        #         b64 = base64.b64encode(vf.read()).decode("utf-8")
-        #         resp["image_vis_b64"] = f"data:image/jpeg;base64,{b64}"
+        if return_vis:
+            # Prefer the visualization produced by the estm function.
+            path_for_vis = vis_path if (vis_path and os.path.exists(vis_path)) else tmp_path
+            mime = "jpeg" if path_for_vis.lower().endswith((".jpg", ".jpeg")) else "png"
+            with open(path_for_vis, "rb") as vf:
+                b64 = base64.b64encode(vf.read()).decode("utf-8")
+            resp["image_vis_b64"] = f"data:image/{mime};base64,{b64}"
 
         return JSONResponse(resp)
 
