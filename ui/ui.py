@@ -9,6 +9,9 @@ import requests
 from PIL import Image
 import gradio as gr
 
+from utils import is_a4_format
+
+
 API_BASE = os.environ.get(
     "API_BASE",
     "https://foot-size-api-762504128529.northamerica-northeast1.run.app"
@@ -96,11 +99,15 @@ def call_api(
 with gr.Blocks() as demo:
     gr.Markdown("# Foot Size UI")
 
+    def_ref_obj = "letter"
+    if is_a4_format():
+        def_ref_obj = "a4"
+
     with gr.Row():
         img = gr.Image(type="filepath", label="Foot photo")
         with gr.Column():
             gender = gr.Radio(["m", "f"], value="m", label="Gender")
-            ref = gr.Radio(["letter", "a4"], value="letter", label="Reference object")
+            ref = gr.Radio(["letter", "a4"], value=def_ref_obj, label="Reference object")
             is_wall = gr.Checkbox(value=True, label="Foot touching wall")
             return_vis = gr.Checkbox(value=True, label="Return visualization")
 
