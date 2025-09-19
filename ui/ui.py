@@ -149,7 +149,7 @@ with gr.Blocks() as demo:
         2. Position your foot on the paper so that your **heel touches the wall**.
         3. Take the photo from the **top view**.
 
-        ![Example foot photo](https://drive.google.com/uc?export=view&id=1qfl01QrIErmttEOTGV2LFuLuSRrXzm3p)
+        ![Example foot photo](https://drive.google.com/thumbnail?id=1qfl01QrIErmttEOTGV2LFuLuSRrXzm3p&sz=w2000)
 
         ## API Usage Instruction
         You can also call the API directly with `curl`:
