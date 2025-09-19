@@ -125,10 +125,6 @@ with gr.Blocks() as demo:
         outputs=[out_json, out_img],
     )
 
-    with gr.Row():
-        out_json = gr.JSON(label="API response (JSON)")
-        out_img = gr.Image(label="Visualization", interactive=False)
-
     if AFFILIATE_URL:
         gr.HTML(f"""
                 <div style="margin-top:0.5rem">
@@ -143,6 +139,31 @@ with gr.Blocks() as demo:
                 </div>
                 </div>
                 """)
+
+    gr.Markdown(
+        """
+        ## How to Take a Photo
+        Please make a photo like this example:
+
+        1. Place paper aligned with the line where the floor and wall connect.
+        2. Position your foot on the paper so that your **heel touches the wall**.
+        3. Take the photo from the **top view**.
+
+        ![Example foot photo](https://drive.google.com/uc?export=view&id=1qfl01QrIErmttEOTGV2LFuLuSRrXzm3p)
+
+        ## API Usage Instruction
+        You can also call the API directly with `curl`:
+
+        ```bash
+        curl -X POST "https://foot-size-api-762504128529.northamerica-northeast1.run.app/measure" \
+        -F "file=@./foot_exmpl.jpg" \
+        -F "gender=m" \
+        -F "ref_obj=paper_letter" \
+        -F "is_wall=true" \
+        -F "return_vis=false"
+        ```
+        """
+    )
 
 
 if __name__ == "__main__":
