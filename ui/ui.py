@@ -21,6 +21,8 @@ API_URL = f"{API_BASE}/measure"
 AFFILIATE_URL = os.environ.get("AMAZON_AFFILIATE_URL", "https://amzn.to/3VpAZ3r")
 IS_AFFILIATE = bool(AFFILIATE_URL and ("tag=" in AFFILIATE_URL or "amzn.to" in AFFILIATE_URL))
 
+STRIPE_BACKEND_URL = f"{API_BASE}/create-checkout-session"
+
 
 def _decode_b64_image(data_uri_or_b64: str) -> Optional[Image.Image]:
     """
@@ -99,6 +101,15 @@ def call_api(
         return {"error": f"Client error: {repr(e)}"}, None
 
 
+def handle_buy():
+    # Call your backend to create a checkout session
+    resp = requests.post(STRIPE_BACKEND_URL)
+    if resp.status_code == 200:
+        checkout_url = resp.json()["url"]
+        return f"[Click here to pay]({checkout_url})"
+    return "Error creating checkout session."
+
+
 with gr.Blocks() as demo:
     gr.Markdown("# Foot Size UI")
 
@@ -164,6 +175,11 @@ with gr.Blocks() as demo:
         ```
         """
     )
+
+    gr.Markdown("# Thank You Store")
+    btn = gr.Button("Buy Thank You")
+    out = gr.Markdown()
+    btn.click(handle_buy, outputs=out)
 
 
 if __name__ == "__main__":

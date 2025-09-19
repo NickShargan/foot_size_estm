@@ -6,9 +6,12 @@ import uvicorn
 import os
 import base64
 
-# import numpy as np
+import stripe
 
 from .foot_size_estm import get_foot_size_estm
+
+
+stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
 
 
 app = FastAPI(
@@ -69,6 +72,25 @@ async def measure(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/create-checkout-session")
+def create_checkout_session():
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {"name": "Thank You"},
+                "unit_amount": 100,  # in cents = $1.00
+            },
+            "quantity": 1,
+        }],
+        mode="payment",
+        success_url="https://foot-ui-oa2w7lswda-nn.a.run.app/",
+        cancel_url="https://foot-ui-oa2w7lswda-nn.a.run.app/",
+    )
+    return JSONResponse({"url": session.url})
 
 
 if __name__ == "__main__":
