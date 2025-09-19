@@ -76,3 +76,9 @@ https://foot-ui-oa2w7lswda-nn.a.run.app/
 
 
 This app may show an Amazon link. As an Amazon Associate I earn from qualifying purchases.
+
+## Results
+
+{"length_mm":268.9608154296875,"width_mm":103.65396118164062,"image_vis_b64":null}
+
+![img](./foot_size_estm/IMG_7350_vis.jpg)
