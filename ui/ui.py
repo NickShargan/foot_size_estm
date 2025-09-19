@@ -145,8 +145,8 @@ with gr.Blocks() as demo:
         ## How to Take a Photo
         Please make a photo like this example:
 
-        1. Place paper aligned with the line where the floor and wall connect.
-        2. Position your foot on the paper so that your **heel touches the wall**.
+        1. Place a sheet of paper on the floor with one edge touching the wall.
+        2. Stand on the paper with your heel touching the wall.
         3. Take the photo from the **top view**.
 
         ![Example foot photo](https://drive.google.com/thumbnail?id=1qfl01QrIErmttEOTGV2LFuLuSRrXzm3p&sz=w2000)
