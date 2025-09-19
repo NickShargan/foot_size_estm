@@ -55,6 +55,7 @@ curl -X POST "https://foot-size-api-762504128529.northamerica-northeast1.run.app
 ```
 PROJECT_ID=$(gcloud config get-value project)
 REGION=northamerica-northeast1
+REPO=containers
 SERVICE_UI=foot-ui
 TAG=$(date +%Y%m%d%H%M)
 
@@ -71,16 +72,7 @@ gcloud run deploy $SERVICE_UI \
 
 https://foot-ui-762504128529.northamerica-northeast1.run.app
 
-gcloud builds submit \
-  --config=cloudbuild.yaml \
-  --substitutions=_IMAGE_UI="$IMAGE_UI" \
-  .
+https://foot-ui-oa2w7lswda-nn.a.run.app/
 
-gcloud run deploy "$SERVICE_UI" \
-  --image "$IMAGE_UI" \
-  --region "$REGION" \
-  --platform managed \
-  --allow-unauthenticated \
-  --set-env-vars API_BASE="https://foot-size-api-762504128529.northamerica-northeast1.run.app" \
-  --memory 2Gi --timeout 300
 
+This app may show an Amazon link. As an Amazon Associate I earn from qualifying purchases.

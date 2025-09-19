@@ -18,6 +18,9 @@ API_BASE = os.environ.get(
 )
 API_URL = f"{API_BASE}/measure"
 
+AFFILIATE_URL = os.environ.get("AMAZON_AFFILIATE_URL", "https://amzn.to/3VpAZ3r")
+IS_AFFILIATE = bool(AFFILIATE_URL and ("tag=" in AFFILIATE_URL or "amzn.to" in AFFILIATE_URL))
+
 
 def _decode_b64_image(data_uri_or_b64: str) -> Optional[Image.Image]:
     """
@@ -121,6 +124,26 @@ with gr.Blocks() as demo:
         inputs=[img, gender, ref, is_wall, return_vis],
         outputs=[out_json, out_img],
     )
+
+    with gr.Row():
+        out_json = gr.JSON(label="API response (JSON)")
+        out_img = gr.Image(label="Visualization", interactive=False)
+
+    if AFFILIATE_URL:
+        gr.HTML(f"""
+                <div style="margin-top:0.5rem">
+                <a href="{AFFILIATE_URL}"
+                    target="_blank"
+                    rel="nofollow sponsored noopener"
+                    style="display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid #ccc;text-decoration:none;">
+                    🛒 Find running shoes on Amazon
+                </a>
+                <div style="font-size:12px;color:#666;margin-top:4px">
+                    *As an Amazon Associate, I may earn from qualifying purchases.*
+                </div>
+                </div>
+                """)
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8080"))

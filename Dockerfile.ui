@@ -14,6 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy app
 COPY ui/ui.py ./ui.py
+COPY ui/utils.py ./utils.py
 
 # Gradio will listen on $PORT
 ENV PORT=8080 PYTHONUNBUFFERED=1
